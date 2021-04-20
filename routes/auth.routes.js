@@ -96,10 +96,17 @@ router.post('/signin', (req, res, next) => {
                         // if the user has signin in successfully redirect to profile
                         // userInfo = response
                         console.log('Session before update ', req.session)
+
+                        // 1. We update the session here
+                        // 2. As soon as we update the session, your middleware kicks in
+                        // it saves the session in the DB in a collection called as `sessions`
+                        
+
                         req.session.userInfo = response
                         req.app.locals.isUserLoggedIn = true 
                         console.log('Session after update ', req.session)
 
+                        // 3. In this response we also tell the browser to set some cookies
                         res.redirect(`/profile`)
                       }
                       else {
@@ -115,10 +122,13 @@ router.post('/signin', (req, res, next) => {
 })
 
 //CUSTOM Middlewares functions
-
 const authorize = (req, res, next) => {
   console.log('See I\'m here')
+  // check if the user is loggedIn
+
+  // If the session has the 'userInfo' property, it means the user is loggedIn
   if (req.session.userInfo) {
+    // Calls the next middleware function 
     next()
   }
   else {
@@ -136,7 +146,10 @@ router.get('/profile', authorize, (req, res, next) => {
 
 
 router.get('/logout', (req, res, next) => {
+    // set the global variable 'isUserLoggedIn' so that we can use it in layout.hbs
     req.app.locals.isUserLoggedIn = false  
+
+    // deletes a specific session from mongoDB
     req.session.destroy()
     res.redirect('/')
 })
